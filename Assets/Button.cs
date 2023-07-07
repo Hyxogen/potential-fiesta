@@ -11,10 +11,11 @@ public class Button : MonoBehaviour
         wall.SetActive(true);
     }
 
-    void OnCollisionEnter(Collision collision) {
+    void OnTriggerEnter(Collider collision) {
         wall.SetActive(false);
     }
-    void OnCollisionExit(Collision collision) {
+
+    void OnTriggerExit(Collider collision) {
         wall.SetActive(true);
     }
 }
