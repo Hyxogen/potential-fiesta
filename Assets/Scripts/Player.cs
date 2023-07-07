@@ -7,16 +7,22 @@ public class Player : MonoBehaviour
     private CharacterController characterController;
     private Vector2 rotation;
     private Vector3 velocity;
+    private Rigidbody item;
+    private Transform target;
+
+    private int buttonPresses = 0;
 
     public float sensitivity = 3.0f;
     public float speed = 5.0f;
     public float jump = 5.0f;
+    public float strength = 20.0f;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
 
         characterController = GetComponent<CharacterController>();
+        target = Camera.main.transform.Find("Target");
     }
 
     void FixedUpdate()
@@ -35,6 +41,35 @@ public class Player : MonoBehaviour
         {
             velocity.y = jump;
         }
+
+        while (buttonPresses > 0)
+        {
+            if (item)
+            {
+                item.velocity = Vector3.zero;
+                item.excludeLayers = LayerMask.GetMask();
+                item = null;
+            }
+            else
+            {
+                Transform cameraTransform = Camera.main.transform;
+                LayerMask mask = LayerMask.GetMask("Object");
+                RaycastHit info;
+
+                if (Physics.Raycast(cameraTransform.position, cameraTransform.forward, out info, 1.5f, mask))
+                {
+                    item = info.rigidbody;
+                    item.excludeLayers = LayerMask.GetMask("Player");
+                }
+            }
+
+            buttonPresses -= 1;
+        }
+
+        if (item)
+        {
+            item.velocity = (target.position - item.position) * strength;
+        }
     }
 
     void Update()
@@ -44,5 +79,10 @@ public class Player : MonoBehaviour
         rotation.x = Mathf.Clamp(rotation.x, -90.0f, 90.0f);
 
         Camera.main.transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, 0.0f);
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            buttonPresses += 1;
+        }
     }
 }
